@@ -17,3 +17,9 @@ spring:
     username: admin
     password: 123
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+jwt:
+  public:
+    key: classpath:app.pub
+  private:
+    key: classpath.app.key

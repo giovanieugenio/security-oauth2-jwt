@@ -2,6 +2,7 @@ package org.apirest.springsecurity.controller;
 
 import org.apirest.springsecurity.controller.dto.LoginRequest;
 import org.apirest.springsecurity.controller.dto.LoginResponse;
+import org.apirest.springsecurity.entities.Role;
 import org.apirest.springsecurity.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
 
 @RestController
 public class TokenController {
@@ -39,11 +41,16 @@ public class TokenController {
         }
         var now = Instant.now();
         var expiresIn = 300L;
+        var scope = user.get().getRoles()
+                .stream()
+                .map(Role::getName)
+                .collect(Collectors.joining(" "));
         var claims = JwtClaimsSet.builder()
                 .issuer("mybackend")
                 .subject(user.get().getId().toString())
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiresIn))
+                .claim("scope", scope)
                 .build();
         var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
         return ResponseEntity.ok(new LoginResponse(jwtValue, expiresIn));
